@@ -8,23 +8,18 @@
 #include "texture.h"
 #include "action.h"
 
-int AnchoP = 800, LargoP = 600;
+int Vel = 13;
+int Vel_x = Vel;
+int Vel_y = 0;
 
-double Vel = 13;
-int Vel_x=Vel,Vel_y=0;
 int Cor_x = 0;
 int Cor_y = 0;
-int Cool_D[2] = {0,0};
 
 
 std::vector<SDL_Point> snake;
-/// [0 - cabeza , n - cola]
+/// [0 - cabeza, n - cola]
 
-void Reset(){
-    Cool_D[0] = 0;
-    Cool_D[1] = 0;
-
-
+void reset(int SCREEN_WIDTH, int SCREEN_HEIGHT){
     snake.clear();
 
     for(int i=0;i<5;i++){
@@ -34,11 +29,11 @@ void Reset(){
     Vel_x = Vel;
     Vel_y =   0;
 
-    snake[0].x = AnchoP/2;
-    snake[0].y = LargoP/2;
+    snake[0].x = SCREEN_WIDTH/2;
+    snake[0].y = SCREEN_HEIGHT/2;
     for(int i=1;i<snake.size();i++){
         snake[i].x = snake[i-1].x + Vel;
-        snake[i].y = LargoP/2;
+        snake[i].y = SCREEN_HEIGHT/2;
     }
 
 }
@@ -74,29 +69,28 @@ bool Verificar_collision(int A_x,int A_y,int B_x,int B_y,int Dim){
     return true;
 }
 
-bool Colision(int Dim){
+bool Colision(int Dim, int SCREEN_WIDTH, int SCREEN_HEIGHT){
 
-    if(snake[snake.size()-1].x>(AnchoP-Dim)){
+    if(snake[snake.size()-1].x>(SCREEN_WIDTH-Dim)){
         return true;
     }
     if(snake[snake.size()-1].x<0){
         return true;
     }
-    if(snake[snake.size()-1].y>(LargoP-Dim)){
+    if(snake[snake.size()-1].y>(SCREEN_HEIGHT-Dim)){
         return true;
     }
     if(snake[snake.size()-1].y<0){
         return true;
     }
     for(int i=1;i<snake.size()-2;i++){
-        if(Verificar_collision(snake[snake.size()-1].x, snake[snake.size()-1].y, snake[i].x, snake[i].y, Dim)==true){
-            Reset();
-            printf("Entró\n");
+        if(Verificar_collision(snake[snake.size()-1].x, snake[snake.size()-1].y, snake[i].x, snake[i].y, Dim) == true){
+            reset(SCREEN_WIDTH, SCREEN_HEIGHT);
         }
     }
     if(Verificar_collision(snake[snake.size()-1].x, snake[snake.size()-1].y, Cor_x, Cor_y, Dim) == true){
-        Cor_x = 10 + rand () % (AnchoP-(4*Dim));
-        Cor_y = 10 + rand () % (LargoP-(4*Dim));
+        Cor_x = 10 + rand () % (SCREEN_WIDTH-(4*Dim));
+        Cor_y = 10 + rand () % (SCREEN_HEIGHT-(4*Dim));
         snake.push_back({0, 0});
 
         for(int i = snake.size() - 2; i>=0; i--){
@@ -113,6 +107,9 @@ int main( int argc, char* args[] ){
     int SCREEN_WIDTH  = 800;
     int SCREEN_HEIGHT = 600;
     int FONT_SIZE     =  20;
+
+    int MOVE_DELAY    =   0;
+    int Dimension = 10;
 
     std::string PATH_FONT = "asset/font/LiberationMono-Regular.ttf";
     std::string PATH_ICON = "asset/icon.bmp";
@@ -143,9 +140,10 @@ int main( int argc, char* args[] ){
     );
 
 
-    Cor_x = rand () % (AnchoP+1);
-    Cor_y = rand () % (LargoP+1);
-    Reset();
+    Cor_x = rand () % (SCREEN_WIDTH  + 1);
+    Cor_y = rand () % (SCREEN_HEIGHT + 1);
+
+    reset(SCREEN_WIDTH, SCREEN_HEIGHT);
     srand(time(0));
     while(!exit){
 
@@ -154,69 +152,65 @@ int main( int argc, char* args[] ){
         }else{
             window.clear_screen();
             //SDL_Teclado(&exit);
-            if(Cool_D[1]!=0){
-                Cool_D[1]--;
+            if(MOVE_DELAY != 0){
+                MOVE_DELAY--;
             }
 
 
             if(action->get_state(action->BUTTON_MOVE_UP)){
                 if(
                     (Vel_y != +Vel) &&
-                    (Cool_D[1]==0)
+                    (MOVE_DELAY == 0)
                 ){
                     Vel_x =    0;
                     Vel_y = -Vel;
-                    Cool_D[1] = 0;
                 }
             }else if(action->get_state(action->BUTTON_MOVE_DOWN)){
-                if((Vel_y != -Vel)&&(Cool_D[1]==0)){
+                if(
+                    (Vel_y != -Vel) &&
+                    (MOVE_DELAY == 0)
+                ){
                     Vel_x =    0;
                     Vel_y = +Vel;
-                    Cool_D[1] = 0;
                 }
             }else if(action->get_state(action->BUTTON_MOVE_LEFT)){
                 if(
                     (Vel_x != +Vel) &&
-                    (Cool_D[1]==0)
+                    (MOVE_DELAY == 0)
                 ){
                     Vel_x = -Vel;
                     Vel_y =    0;
-                    Cool_D[1] = 0;
                 }
             }else if(action->get_state(action->BUTTON_MOVE_RIGHT)){
                 if(
                     (Vel_x != -Vel) &&
-                    (Cool_D[1]==0)
+                    (MOVE_DELAY == 0)
                 ){
                     Vel_x = +Vel;
                     Vel_y =    0;
-                    Cool_D[1] = 0;
                 }
             }
 
-            if(Cool_D[0]==0){
+            if(MOVE_DELAY==0){
                 for(int i=0;i<snake.size()-1;i++){
                     snake[i].x = snake[i+1].x;
                     snake[i].y = snake[i+1].y;
                 }
                 snake[snake.size()-1].x = snake[snake.size()-1].x + Vel_x;
                 snake[snake.size()-1].y = snake[snake.size()-1].y + Vel_y;
-                Cool_D[0] = 6;
-            }else if(Cool_D[0] != 0){
-                Cool_D[0]--;
+                MOVE_DELAY = 6;
+            }else if(MOVE_DELAY != 0){
+                MOVE_DELAY--;
             }
             /// //////////////////////
 
-
-            int Dimension = 10;
-            if(Colision(Dimension) == true){
-                Reset();
+            if(Colision(Dimension, SCREEN_WIDTH, SCREEN_HEIGHT) == true){
+                reset(SCREEN_WIDTH, SCREEN_HEIGHT);
+                MOVE_DELAY = 0;
             }
 
-
-
             // Draw
-            for(int i=0;i<snake.size();i++){
+            for(int i=0; i < snake.size();i++){
                 window.draw_rectangle(
                     {
                         snake[i].x,
@@ -238,7 +232,7 @@ int main( int argc, char* args[] ){
             );
 
             printf("%i, %i\n", Cor_x, Cor_y);
-            printf("%i, %i\n", Cool_D[0], Cool_D[1]);
+            printf("%i\n", MOVE_DELAY);
             printf("%i, %i\n", Vel_x, Vel_y);
 
             window.update_screen();
