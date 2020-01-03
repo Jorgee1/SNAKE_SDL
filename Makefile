@@ -9,6 +9,8 @@ INCLUDE_PATH = include
 TEST_PATH    = test
 ASSET_PATH   = asset
 
+SDL_PATH     = /usr/include/SDL2
+
 PROGRAM_NAME = snake.app
 TEST_NAME    = test.app
 
@@ -24,7 +26,7 @@ TEST_OBJ = $(TEST_PATH)/$(ENTRY_FILE)
 compile_run: compile run
 
 compile: required
-	$(CXX) $(MAIN_OBJ) $(OBJECTS) -o $(BUILD_FOLDER)/$(PROGRAM_NAME) -I $(INCLUDE_PATH) $(CXXFLAGS) $(LIBS)
+	$(CXX) $(MAIN_OBJ) $(OBJECTS) -o $(BUILD_FOLDER)/$(PROGRAM_NAME) -I $(INCLUDE_PATH) $(CXXFLAGS) $(LIBS) -I$(SDL_PATH)
 
 run:
 	./$(BUILD_FOLDER)/$(PROGRAM_NAME)
