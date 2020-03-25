@@ -103,19 +103,21 @@ bool Colision(int Dim, int SCREEN_WIDTH, int SCREEN_HEIGHT){
     return false;
 }
 
-int main( int argc, char* args[] ){
+int main( int argc, char* args[]){
+    srand(time(0));
     int SCREEN_WIDTH  = 800;
     int SCREEN_HEIGHT = 600;
     int FONT_SIZE     =  20;
 
-    int MOVE_DELAY    =   0;
-    int Dimension = 10;
-
-    std::string PATH_FONT = "asset/font/LiberationMono-Regular.ttf";
-    std::string PATH_ICON = "asset/icon.bmp";
-    std::string GAME_NAME = "SNAKE";
+    int MOVE_DELAY =  0;
+    int Dimension  = 10;
 
     bool exit = false;
+  
+    std::string PATH(SDL_GetBasePath());
+    std::string PATH_FONT = PATH + "asset/font/LiberationMono-Regular.ttf";
+    std::string PATH_ICON = PATH + "asset/icon.bmp";
+    std::string GAME_NAME = "SNAKE";
     
     SDL_Color COLOR_BLACK = {0x00, 0x00, 0x00, 0xFF};
     SDL_Color COLOR_RED   = {0xFF, 0x00, 0x00, 0xFF};
@@ -144,7 +146,7 @@ int main( int argc, char* args[] ){
     Cor_y = rand () % (SCREEN_HEIGHT + 1);
 
     reset(SCREEN_WIDTH, SCREEN_HEIGHT);
-    srand(time(0));
+
     while(!exit){
 
         if(window.check_exit()){
