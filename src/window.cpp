@@ -25,7 +25,14 @@ void Window::init(std::string window_name){
     if(SDL_Init( SDL_INIT_VIDEO ) < 0){
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     }else{
-        window = SDL_CreateWindow(window_name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow(
+            window_name.c_str(),
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN
+        );
         if(window == NULL){
             printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
         }else{

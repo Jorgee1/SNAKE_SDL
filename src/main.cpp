@@ -16,7 +16,7 @@ int Cor_x = 0;
 int Cor_y = 0;
 
 
-std::vector<SDL_Point> snake;
+std::vector<SDL_Rect> snake;
 /// [0 - cabeza, n - cola]
 
 void reset(int SCREEN_WIDTH, int SCREEN_HEIGHT){
@@ -31,42 +31,39 @@ void reset(int SCREEN_WIDTH, int SCREEN_HEIGHT){
 
     snake[0].x = SCREEN_WIDTH/2;
     snake[0].y = SCREEN_HEIGHT/2;
+    snake[0].h = 10;
+    snake[0].w = 10;
     for(int i=1;i<snake.size();i++){
         snake[i].x = snake[i-1].x + Vel;
         snake[i].y = SCREEN_HEIGHT/2;
+        snake[i].h = 10;
+        snake[i].w = 10;
     }
 
 }
 
 
-bool Verificar_collision(int A_x,int A_y,int B_x,int B_y,int Dim){
-        int A_IZQ,A_DER,A_ARR,A_ABJ;
-        int B_IZQ,B_DER,B_ARR,B_ABJ;
+bool Verificar_collision(SDL_Rect A, SDL_Rect A){
+    /// PARA A
+    int A_IZQ = A.x;
+    int A_DER = A.x + A.w;
+    int A_ARR = A.y;
+    int A_ABJ = A.y + A.h;
+    /// PARA B
+    int B_IZQ = B.x;
+    int B_DER = B.x + B.w;
+    int B_ARR = B.y;
+    int B_ABJ = B.y + B.h;
 
-        /// PARA A
-        A_IZQ = A_x;
-        A_DER = A_x + Dim;
-        A_ARR = A_y;
-        A_ABJ = A_y + Dim;
-        /// PARA B
-        B_IZQ = B_x;
-        B_DER = B_x + Dim;
-        B_ARR = B_y;
-        B_ABJ = B_y + Dim;
-        /// Restriccones
-        if(A_ABJ<=B_ARR){
-            return false;
-        }
-        if(A_ARR>=B_ABJ){
-            return false;
-        }
-        if(A_DER<=B_IZQ){
-            return false;
-        }
-        if(A_IZQ>=B_DER){
-            return false;
-        }
-    return true;
+    if(
+        (A_ABJ>=B_ARR) &&
+        (A_ARR<=B_ABJ) &&
+        (A_DER>=B_IZQ) &&
+        (A_IZQ<=B_DER)
+    ){
+        return true;
+    }
+    return false;
 }
 
 bool Colision(int Dim, int SCREEN_WIDTH, int SCREEN_HEIGHT){
@@ -84,11 +81,11 @@ bool Colision(int Dim, int SCREEN_WIDTH, int SCREEN_HEIGHT){
         return true;
     }
     for(int i=1;i<snake.size()-2;i++){
-        if(Verificar_collision(snake[snake.size()-1].x, snake[snake.size()-1].y, snake[i].x, snake[i].y, Dim) == true){
+        if(Verificar_collision(snake[snake.size()-1], {snake[i].x, snake[i].y, Dim, Dim}) == true){
             reset(SCREEN_WIDTH, SCREEN_HEIGHT);
         }
     }
-    if(Verificar_collision(snake[snake.size()-1].x, snake[snake.size()-1].y, Cor_x, Cor_y, Dim) == true){
+    if(Verificar_collision(snake[snake.size()-1], {Cor_x, Cor_y, Dim, Dim}) == true){
         Cor_x = 10 + rand () % (SCREEN_WIDTH-(4*Dim));
         Cor_y = 10 + rand () % (SCREEN_HEIGHT-(4*Dim));
         snake.push_back({0, 0});
@@ -128,7 +125,12 @@ int main( int argc, char* args[]){
     Window window(GAME_NAME, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_BLACK);
     window.set_icon(PATH_ICON);
 
-    TextureText text_white(window.get_render(), PATH_FONT, COLOR_WHITE, FONT_SIZE);
+    TextureText text_white(
+        window.get_render(),
+        PATH_FONT,
+        COLOR_WHITE,
+        FONT_SIZE
+    );
 
     Action* action = Action::get_instance();
     action->init(
@@ -141,7 +143,6 @@ int main( int argc, char* args[]){
         SDL_SCANCODE_RIGHT
     );
 
-
     Cor_x = rand () % (SCREEN_WIDTH  + 1);
     Cor_y = rand () % (SCREEN_HEIGHT + 1);
 
@@ -153,11 +154,11 @@ int main( int argc, char* args[]){
             exit = true;
         }else{
             window.clear_screen();
-            //SDL_Teclado(&exit);
+
+
             if(MOVE_DELAY != 0){
                 MOVE_DELAY--;
             }
-
 
             if(action->get_state(action->BUTTON_MOVE_UP)){
                 if(
@@ -214,12 +215,7 @@ int main( int argc, char* args[]){
             // Draw
             for(int i=0; i < snake.size();i++){
                 window.draw_rectangle(
-                    {
-                        snake[i].x,
-                        snake[i].y,
-                        Dimension,
-                        Dimension
-                    },
+                    snake[i],
                     {0xFF,0xFF,0xFF,0xFF}
                 );
             }
